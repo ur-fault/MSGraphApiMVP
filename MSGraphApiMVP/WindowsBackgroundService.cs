@@ -26,7 +26,8 @@ class WindowsBackgroundService : BackgroundService
         //await TokenAcquirerFactory.GetDefaultInstance().GetTokenAcquirer()
         //    .GetTokenForAppAsync("https://graph.microsoft.com/.default", cancellationToken: cancellationToken);
 
-        await _graphServiceClient.Users.GetAsync(o => o.Options.WithAppOnly(), cancellationToken);
+        var users = await _graphServiceClient.Users.GetAsync(o => o.Options.WithAppOnly(), cancellationToken);
+        _logger.LogInformation("{Users}", users is null ? "Null" : string.Join(", ", users.Value.Select(u => u.DisplayName)));
 
         //await _tokenAcquisition.GetAccessTokenForAppAsync("https://graph.microsoft.com/.default");
     }

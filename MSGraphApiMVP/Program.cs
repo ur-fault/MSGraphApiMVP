@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
-using Microsoft.Identity.Abstractions;
 using MSGraphApiMVP;
 
+#region DI version
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options => options.ServiceName = "PrometheusMVPProvider")
     .ConfigureServices((_, services) => {
@@ -16,21 +14,21 @@ var builder = Host.CreateDefaultBuilder(args)
 
         services.AddHostedService<WindowsBackgroundService>();
 
-        services.AddMicrosoftGraph(options => {
-            options.Scopes = new[] { "User.Read.All" };
-        });
-
-        //services.AddHttpClient();
-        //services.AddTokenAcquisition();
-
-        services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme);
-        services.AddInMemoryTokenCaches();
+        // the ultimate cheat, should somehow use the original DI container
+        {
+            var factory = TokenAcquirerFactory.GetDefaultInstance();
+            factory.Services.AddMicrosoftGraph();
+            var client = factory.Build().GetRequiredService<GraphServiceClient>();
+            services.AddSingleton(client);
+        }
     });
 
 var host = builder.Build();
 
 await host.RunAsync();
+#endregion
 
+#region Manual version
 //var factory = TokenAcquirerFactory.GetDefaultInstance();
 //var services = factory.Services;
 
@@ -41,3 +39,4 @@ await host.RunAsync();
 //var client = serviceProvider.GetRequiredService<GraphServiceClient>();
 //var users = await client.Users.GetAsync(r => r.Options.WithAppOnly());
 //users.Value.ForEach(u => Console.WriteLine(u.DisplayName));
+#endregion
