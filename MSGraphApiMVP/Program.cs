@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.Console;
@@ -9,18 +10,23 @@ using MSGraphApiMVP;
 #region DI version
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService(options => options.ServiceName = "PrometheusMVPProvider")
-    .ConfigureServices((_, services) => {
+    .ConfigureServices((context, services) => {
+        var configuration = context.Configuration;
+
         LoggerProviderOptions.RegisterProviderOptions<ConsoleLoggerOptions, ConsoleLoggerProvider>(services);
 
         services.AddHostedService<WindowsBackgroundService>();
 
-        // the ultimate cheat, should somehow use the original DI container
+        // workaround, should somehow use the original DI container
+        // but wasn't able to get it to work
         {
             var factory = TokenAcquirerFactory.GetDefaultInstance();
             factory.Services.AddMicrosoftGraph();
             var client = factory.Build().GetRequiredService<GraphServiceClient>();
             services.AddSingleton(client);
         }
+
+        services.AddSingleton(configuration.GetSection("GraphService").Get<GraphServiceConfiguration>()!.Validate());
     });
 
 var host = builder.Build();
