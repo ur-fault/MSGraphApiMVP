@@ -26,7 +26,7 @@ var builder = Host.CreateDefaultBuilder(args)
             services.AddSingleton(client);
         }
 
-        services.AddSingleton(configuration.GetSection("GraphService").Get<GraphServiceConfiguration>()!.Validate());
+        services.AddSingleton(configuration.GetSection("GraphService").Get<GraphServiceConfiguration>()?.Validate() ?? new GraphServiceConfiguration());
     });
 
 var host = builder.Build();

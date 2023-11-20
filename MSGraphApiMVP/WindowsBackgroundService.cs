@@ -128,7 +128,7 @@ class WindowsBackgroundService : BackgroundService
         var filter = string.Join(" and ", filters);
         _logger.LogDebug(@"Getting users with filter: {filter}", filter);
 
-        _logger.LogDebug("Getting fields: {fields}", string.Join(", ", select ?? new string[] { }));
+        _logger.LogDebug("Selecting fields: {fields}", string.Join(", ", select ?? Array.Empty<string>()));
 
         var users = await service.GetAsync(configuration => {
             var parameters = configuration.QueryParameters = new UsersRequestBuilder.UsersRequestBuilderGetQueryParameters();
@@ -146,8 +146,11 @@ class WindowsBackgroundService : BackgroundService
     }
 
     private string StringifyParamsList(ICollection<string> list) {
-        if (list.IsNullOrEmpty())
-            throw new ArgumentException("collection must not be `null` or empty", nameof(list));
+        if (list is null )
+            throw new ArgumentException("Collection must not be `null`", nameof(list));
+
+        if (list.Count == 0)
+            throw new ArgumentException("Collection must not be empty", nameof(list));
 
         return string.Join(',', list.Select(item => $"'{item}'"));
     }
