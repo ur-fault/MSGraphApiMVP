@@ -9,7 +9,7 @@ using MSGraphApiMVP;
 
 #region DI version
 var builder = Host.CreateDefaultBuilder(args)
-    .UseWindowsService(options => options.ServiceName = "PrometheusMVPProvider")
+    .UseWindowsService(options => options.ServiceName = "MSGraphApiMVP")
     .ConfigureServices((context, services) => {
         var configuration = context.Configuration;
 

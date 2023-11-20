@@ -27,5 +27,6 @@ internal class GraphServiceConfiguration
 internal enum LogObject
 {
     Count,
-    Json, DisplayName,
+    Json,
+    DisplayName,
 }
